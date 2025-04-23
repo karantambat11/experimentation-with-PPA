@@ -421,6 +421,38 @@ if company_file and competitor_file:
             else:
                 st.info("Please select two different SKUs.")
 
+            import matplotlib.pyplot as plt
+            
+            pivot_sales = company_df.groupby(['Classification', 'Calculated Price Tier'])['Present Net Sales'].sum().reset_index()
+            pivot_sales['Share %'] = pivot_sales.groupby('Classification')['Present Net Sales'].transform(lambda x: x / x.sum() * 100)
+            bar_data = pivot_sales.pivot(index='Classification', columns='Calculated Price Tier', values='Share %').fillna(0)
+            
+            fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
+            bar_data.plot(kind='bar', stacked=True, ax=ax_bar)
+            ax_bar.set_ylabel("Net Sales Share (%)")
+            ax_bar.set_title("Net Sales % by Price Tier per Classification")
+            ax_bar.legend(title="Price Tier", bbox_to_anchor=(1.05, 1), loc='upper left')
+            st.pyplot(fig_bar)
+
+
+            import seaborn as sns
+
+            comp_heatmap = competitor_df.groupby(['Classification', 'Calculated Price Tier'])['SKU'].nunique().unstack(fill_value=0)
+            fig_heat, ax_heat = plt.subplots(figsize=(8, 5))
+            sns.heatmap(comp_heatmap, annot=True, fmt="d", cmap="YlGnBu", ax=ax_heat, cbar=False)
+            ax_heat.set_title("Competitor SKU Count by Classification & Price Tier")
+            st.pyplot(fig_heat)
+
+
+            company_df["Growth"] = company_df["Present Net Sales"] - company_df["Previous Net Sales"]
+            top_growth_skus = company_df.nlargest(5, "Growth")[["SKU", "Growth"]]
+            st.subheader("🔥 Top 5 SKUs Driving Growth")
+            st.dataframe(top_growth_skus)
+
+
+            
+
+
 
 
 
