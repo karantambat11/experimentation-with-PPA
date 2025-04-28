@@ -574,6 +574,40 @@ if company_file and competitor_file:
             st.markdown(matrix_html, unsafe_allow_html=True)
 
 
+# --- 📊 Brand-Level Market Share and BPS Change Analysis ---
+
+            st.header("🏷️ Brand Market Share and BPS Change")
+            
+            # Full dataset
+            full_df_for_brands = pd.concat([company_df, competitor_df], ignore_index=True)
+            
+            total_previous_net_sales = full_df_for_brands["Previous Net Sales"].sum()
+            total_present_net_sales = full_df_for_brands["Present Net Sales"].sum()
+            
+            brand_summary = []
+            
+            for brand in sorted(full_df_for_brands["Parent Brand"].dropna().unique()):
+                brand_df = full_df_for_brands[full_df_for_brands["Parent Brand"] == brand]
+                
+                prev_sales = brand_df["Previous Net Sales"].sum()
+                curr_sales = brand_df["Present Net Sales"].sum()
+                
+                prev_share = (prev_sales / total_previous_net_sales * 100) if total_previous_net_sales else 0
+                curr_share = (curr_sales / total_present_net_sales * 100) if total_present_net_sales else 0
+                bps_change = (curr_share - prev_share) * 100  # Basis Points
+                
+                brand_summary.append({
+                    "Parent Brand": brand,
+                    "Previous Share %": f"{prev_share:.1f}%",
+                    "Current Share %": f"{curr_share:.1f}%",
+                    "BPS Change": f"{bps_change:.0f} BPS"
+                })
+            
+            brand_summary_df = pd.DataFrame(brand_summary).sort_values(by="Current Share %", ascending=False)
+            
+            st.dataframe(brand_summary_df)
+
+
 
 
 
