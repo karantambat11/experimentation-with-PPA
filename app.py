@@ -421,27 +421,6 @@ if company_file and competitor_file:
             else:
                 st.info("Please select two different SKUs.")
 
-        
-
-
-            import seaborn as sns
-
-            comp_heatmap = competitor_df.groupby(['Classification', 'Calculated Price Tier'])['SKU'].nunique().unstack(fill_value=0)
-            fig_heat, ax_heat = plt.subplots(figsize=(8, 5))
-            sns.heatmap(comp_heatmap, annot=True, fmt="d", cmap="YlGnBu", ax=ax_heat, cbar=False)
-            ax_heat.set_title("Competitor SKU Count by Classification & Price Tier")
-            st.pyplot(fig_heat)
-
-
-            company_df["Growth"] = company_df["Present Net Sales"] - company_df["Previous Net Sales"]
-            top_growth_skus = company_df.nlargest(5, "Growth")[["SKU", "Growth"]]
-            st.subheader("🔥 Top 5 SKUs Driving Growth")
-            st.dataframe(top_growth_skus)
-
-
-            
-
-
 
 
 
