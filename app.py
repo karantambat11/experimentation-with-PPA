@@ -13,7 +13,8 @@ company_template_cols = [
 
 competitor_template_cols = [
     "SKU", "Pack Size", "Price", "Number of Washes",
-    "Classification", "Price Tier", "Parent Brand"
+    "Classification", "Price Tier", "Parent Brand",
+    "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales"
 ]
 
 def generate_excel_download(df: pd.DataFrame):
@@ -420,6 +421,64 @@ if company_file and competitor_file:
                 """)
             else:
                 st.info("Please select two different SKUs.")
+
+# --- 📊 New Section: Classification and Price Tier Growth and Share Analysis ---
+
+            st.header("📊 Classification and Price Tier: Value Growth and Share")
+            
+            # Full dataset: company + competitor
+            full_df_for_analysis = pd.concat([company_df, competitor_df], ignore_index=True)
+            
+            # --- 📂 1. Classification Level Analysis ---
+            classification_summary = []
+            
+            total_prev_sales = full_df_for_analysis["Previous Net Sales"].sum()
+            total_curr_sales = full_df_for_analysis["Present Net Sales"].sum()
+            
+            for cls in sorted(full_df_for_analysis["Classification"].unique()):
+                cls_df = full_df_for_analysis[full_df_for_analysis["Classification"] == cls]
+                
+                prev_sales = cls_df["Previous Net Sales"].sum()
+                curr_sales = cls_df["Present Net Sales"].sum()
+                
+                growth = ((curr_sales - prev_sales) / prev_sales * 100) if prev_sales else 0
+                share = (curr_sales / total_curr_sales * 100) if total_curr_sales else 0
+                
+                classification_summary.append({
+                    "Classification": cls,
+                    "Sales Value Growth %": f"{growth:.1f}%",
+                    "Value Share %": f"{share:.1f}%"
+                })
+            
+            classification_df = pd.DataFrame(classification_summary)
+            
+            st.subheader("📂 Classification Summary")
+            st.dataframe(classification_df)
+            
+            # --- 📂 2. Price Tier Level Analysis ---
+            tier_summary = []
+            
+            for tier in ['Premium', 'Mainstream', 'Value']:  # Ensure order
+                tier_df = full_df_for_analysis[full_df_for_analysis["Calculated Price Tier"] == tier]
+                
+                prev_sales = tier_df["Previous Net Sales"].sum()
+                curr_sales = tier_df["Present Net Sales"].sum()
+                
+                growth = ((curr_sales - prev_sales) / prev_sales * 100) if prev_sales else 0
+                share = (curr_sales / total_curr_sales * 100) if total_curr_sales else 0
+                
+                tier_summary.append({
+                    "Price Tier": tier,
+                    "Sales Value Growth %": f"{growth:.1f}%",
+                    "Value Share %": f"{share:.1f}%"
+                })
+            
+            tier_df_final = pd.DataFrame(tier_summary)
+            
+            st.subheader("📂 Price Tier Summary")
+            st.dataframe(tier_df_final)
+
+
 
 
 
