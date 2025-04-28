@@ -483,7 +483,9 @@ if company_file and competitor_file:
 
             # --- 📊 New Section: Refined Price Tier × Classification Matrix ---
 
-            st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %) [Refined]")
+            # --- 📊 New Section: Refined Price Tier × Classification Matrix (Horizontal Layout) ---
+
+            st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %) [Horizontal]")
             
             # Full data: company + competitor
             full_df_for_matrix = pd.concat([company_df, competitor_df], ignore_index=True)
@@ -516,8 +518,9 @@ if company_file and competitor_file:
                 }
                 table.inner td {
                     border: none;
-                    padding: 2px;
+                    padding: 2px 5px;
                     font-size: 11px;
+                    text-align: center;
                 }
             </style>
             
@@ -546,12 +549,14 @@ if company_file and competitor_file:
                         share_percent = (our_present / total_present * 100) if total_present else 0
                         growth_percent = ((total_present - total_previous) / total_previous * 100) if total_previous else 0
             
-                        # Mini table inside each cell
+                        # Mini table inside each cell (horizontal layout)
                         cell_text = f"""
                         <table class="inner">
-                            <tr><td><b>{currency_symbol}{total_present:,.0f}</b></td></tr>
-                            <tr><td>{share_percent:.1f}%</td></tr>
-                            <tr><td>{growth_percent:.1f}%</td></tr>
+                            <tr>
+                                <td><b>{currency_symbol}{total_present:,.0f}</b></td>
+                                <td>{share_percent:.1f}%</td>
+                                <td>{growth_percent:.1f}%</td>
+                            </tr>
                         </table>
                         """
                     else:
@@ -563,6 +568,7 @@ if company_file and competitor_file:
             matrix_html += "</table>"
             
             st.markdown(matrix_html, unsafe_allow_html=True)
+
 
 
 
