@@ -481,7 +481,9 @@ if company_file and competitor_file:
 
 # --- 📊 New Section: Matrix of Price Tier × Classification ---
 
-            st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %)")
+            # --- 📊 New Section: Refined Price Tier × Classification Matrix ---
+
+            st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %) [Refined]")
             
             # Full data: company + competitor
             full_df_for_matrix = pd.concat([company_df, competitor_df], ignore_index=True)
@@ -492,25 +494,34 @@ if company_file and competitor_file:
             # Initialize matrix
             matrix_html = """
             <style>
-                table {
+                table.main {
                     border-collapse: collapse;
                     width: 100%;
                     font-family: Arial, sans-serif;
                     font-size: 12px;
                 }
-                th, td {
+                table.main th, table.main td {
                     border: 1px solid #ddd;
-                    padding: 8px;
+                    padding: 6px;
                     text-align: center;
                     vertical-align: middle;
                 }
-                th {
+                table.main th {
                     background-color: #f2f2f2;
                     font-weight: bold;
                 }
+                table.inner {
+                    width: 100%;
+                    border: none;
+                }
+                table.inner td {
+                    border: none;
+                    padding: 2px;
+                    font-size: 11px;
+                }
             </style>
             
-            <table>
+            <table class="main">
             <tr>
                 <th>Price Tier \\ Classification</th>
             """
@@ -535,7 +546,14 @@ if company_file and competitor_file:
                         share_percent = (our_present / total_present * 100) if total_present else 0
                         growth_percent = ((total_present - total_previous) / total_previous * 100) if total_previous else 0
             
-                        cell_text = f"{currency_symbol}{total_present:,.0f}<br>{share_percent:.1f}% Share<br>{growth_percent:.1f}% Growth"
+                        # Mini table inside each cell
+                        cell_text = f"""
+                        <table class="inner">
+                            <tr><td><b>{currency_symbol}{total_present:,.0f}</b></td></tr>
+                            <tr><td>{share_percent:.1f}%</td></tr>
+                            <tr><td>{growth_percent:.1f}%</td></tr>
+                        </table>
+                        """
                     else:
                         cell_text = "-"
             
@@ -545,6 +563,7 @@ if company_file and competitor_file:
             matrix_html += "</table>"
             
             st.markdown(matrix_html, unsafe_allow_html=True)
+
 
 
 
