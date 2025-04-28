@@ -481,70 +481,70 @@ if company_file and competitor_file:
 
 # --- 📊 New Section: Matrix of Price Tier × Classification ---
 
-st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %)")
-
-# Full data: company + competitor
-full_df_for_matrix = pd.concat([company_df, competitor_df], ignore_index=True)
-
-tiers = ['Premium', 'Mainstream', 'Value']  # Keep same order
-classifications = sorted(full_df_for_matrix['Classification'].unique())
-
-# Initialize matrix
-matrix_html = """
-<style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-        vertical-align: middle;
-    }
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
-</style>
-
-<table>
-<tr>
-    <th>Price Tier \\ Classification</th>
-"""
-
-for cls in classifications:
-    matrix_html += f"<th>{cls}</th>"
-matrix_html += "</tr>"
-
-for tier in tiers:
-    matrix_html += f"<tr><td><b>{tier}</b></td>"
-    for cls in classifications:
-        segment_df = full_df_for_matrix[
-            (full_df_for_matrix["Calculated Price Tier"] == tier) &
-            (full_df_for_matrix["Classification"] == cls)
-        ]
-        
-        if not segment_df.empty:
-            total_present = segment_df["Present Net Sales"].sum()
-            total_previous = segment_df["Previous Net Sales"].sum()
-            our_present = segment_df[segment_df["Is Competitor"] == False]["Present Net Sales"].sum()
-
-            share_percent = (our_present / total_present * 100) if total_present else 0
-            growth_percent = ((total_present - total_previous) / total_previous * 100) if total_previous else 0
-
-            cell_text = f"{currency_symbol}{total_present:,.0f}<br>{share_percent:.1f}% Share<br>{growth_percent:.1f}% Growth"
-        else:
-            cell_text = "-"
-
-        matrix_html += f"<td>{cell_text}</td>"
-    matrix_html += "</tr>"
-
-matrix_html += "</table>"
-
-st.markdown(matrix_html, unsafe_allow_html=True)
+            st.header("📊 Price Tier vs Classification Matrix (Sales, Share %, Growth %)")
+            
+            # Full data: company + competitor
+            full_df_for_matrix = pd.concat([company_df, competitor_df], ignore_index=True)
+            
+            tiers = ['Premium', 'Mainstream', 'Value']  # Keep same order
+            classifications = sorted(full_df_for_matrix['Classification'].unique())
+            
+            # Initialize matrix
+            matrix_html = """
+            <style>
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: center;
+                    vertical-align: middle;
+                }
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+            </style>
+            
+            <table>
+            <tr>
+                <th>Price Tier \\ Classification</th>
+            """
+            
+            for cls in classifications:
+                matrix_html += f"<th>{cls}</th>"
+            matrix_html += "</tr>"
+            
+            for tier in tiers:
+                matrix_html += f"<tr><td><b>{tier}</b></td>"
+                for cls in classifications:
+                    segment_df = full_df_for_matrix[
+                        (full_df_for_matrix["Calculated Price Tier"] == tier) &
+                        (full_df_for_matrix["Classification"] == cls)
+                    ]
+                    
+                    if not segment_df.empty:
+                        total_present = segment_df["Present Net Sales"].sum()
+                        total_previous = segment_df["Previous Net Sales"].sum()
+                        our_present = segment_df[segment_df["Is Competitor"] == False]["Present Net Sales"].sum()
+            
+                        share_percent = (our_present / total_present * 100) if total_present else 0
+                        growth_percent = ((total_present - total_previous) / total_previous * 100) if total_previous else 0
+            
+                        cell_text = f"{currency_symbol}{total_present:,.0f}<br>{share_percent:.1f}% Share<br>{growth_percent:.1f}% Growth"
+                    else:
+                        cell_text = "-"
+            
+                    matrix_html += f"<td>{cell_text}</td>"
+                matrix_html += "</tr>"
+            
+            matrix_html += "</table>"
+            
+            st.markdown(matrix_html, unsafe_allow_html=True)
 
 
 
