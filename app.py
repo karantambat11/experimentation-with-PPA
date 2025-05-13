@@ -136,9 +136,6 @@ def generate_dynamic_html(sku_matrix, classification_metrics, tier_metrics, clas
     return html
 
 
-def clean_numeric(series):
-    cleaned = series.astype(str).str.replace(r"[^\d.\-]", "", regex=True)
-    return pd.to_numeric(cleaned, errors="coerce")
 
 
 
@@ -160,11 +157,19 @@ if company_file and competitor_file:
     if company_df["Classification"].nunique() > 4:
         st.error("You have more than 4 classifications in your company data.")
     else:
-        # Clean numeric fields
-        for col in ["Price", "Number of Washes", "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales"]:
-            company_df[col] = clean_numeric(company_df[col])
-        for col in ["Price", "Number of Washes"]:
-            competitor_df[col] = clean_numeric(competitor_df[col])
+                # Clean numeric fields
+                # Clean numeric columns (company)
+        company_numeric_cols = [
+            "Price", "Number of Washes", "Previous Volume", "Present Volume", 
+            "Previous Net Sales", "Present Net Sales", "Shelf Row"
+        ]
+        company_df[company_numeric_cols] = company_df[company_numeric_cols].apply(pd.to_numeric, errors="coerce")
+        
+        # Clean numeric columns (competitor)
+        competitor_numeric_cols = ["Price", "Number of Washes", "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales", "Shelf Row"]
+        competitor_df[competitor_numeric_cols] = competitor_df[competitor_numeric_cols].apply(pd.to_numeric, errors="coerce")
+
+
         
         # Calculate Price per Wash
         company_df["Price per Wash"] = company_df["Price"] / company_df["Number of Washes"]
