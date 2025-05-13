@@ -137,12 +137,9 @@ def generate_dynamic_html(sku_matrix, classification_metrics, tier_metrics, clas
 
 
 def clean_numeric(series):
-    return (
-        series.astype(str)
-        .str.replace(r"[^\d.\-]", "", regex=True)  # Remove {currency_symbol}, commas, $, spaces
-        .replace("", pd.NA)
-        .astype(float)
-    )
+    cleaned = series.astype(str).str.replace(r"[^\d.\-]", "", regex=True)
+    return pd.to_numeric(cleaned, errors="coerce")
+
 
 
 if 'classified' not in st.session_state:
