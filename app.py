@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 company_template_cols = [
     "SKU", "Pack Size", "Price", "Number of Washes",
     "Classification", "Price Tier", "Parent Brand",
-    "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales"
+    "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales", "Shelf Row"
 ]
 
 competitor_template_cols = [
     "SKU", "Pack Size", "Price", "Number of Washes",
     "Classification", "Price Tier", "Parent Brand",
-    "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales"
+    "Previous Volume", "Present Volume", "Previous Net Sales", "Present Net Sales", "Shelf Row"
 ]
 
 def generate_excel_download(df: pd.DataFrame):
@@ -150,6 +150,11 @@ if 'classified' not in st.session_state:
 
 
 if company_file and competitor_file:
+    st.subheader("Shelf Configuration")
+    shelf_rows = st.number_input("Enter number of shelf rows:", min_value=1, value=3)
+    effective_sku_capacity = shelf_rows * 3 * 0.75
+    st.markdown(f"**Effective SKU Capacity (3 SKUs/row × 0.75):** {effective_sku_capacity:.1f}")
+
     st.subheader("Currency Settings")
     currency_symbol = st.text_input("Enter your currency symbol (e.g. ₹, $, €, etc.):", value="₹")
     company_df = pd.read_csv(company_file)
@@ -166,6 +171,11 @@ if company_file and competitor_file:
         
         # Calculate Price per Wash
         company_df["Price per Wash"] = company_df["Price"] / company_df["Number of Washes"]
+                # Filter for valid SKUs (for growth only)
+        valid_company_df = company_df[
+            ~((company_df['Previous Volume'].fillna(0) == 0) & (company_df['Previous Net Sales'].fillna(0) == 0))
+        ].copy()
+
         competitor_df["Price per Wash"] = competitor_df["Price"] / competitor_df["Number of Washes"]
 
 
@@ -221,7 +231,7 @@ if company_file and competitor_file:
             # --- Classification-level metrics
             for cls in classifications:
                 cls_df = full_df[full_df['Classification'] == cls]
-                prev_rev = cls_df['Previous Net Sales'].sum()
+                prev_rev = valid_company_df[valid_company_df['Classification'] == cls]['Previous Net Sales'].sum()
                 curr_rev = cls_df['Present Net Sales'].sum()
                 
                 growth = ((curr_rev - prev_rev) / prev_rev * 100) if prev_rev else 0
@@ -237,7 +247,7 @@ if company_file and competitor_file:
             # --- Tier-level metrics
             for tier in tiers:
                 tier_df = full_df[full_df["Calculated Price Tier"] == tier]
-                prev_rev = tier_df["Previous Net Sales"].sum()
+                prev_rev = valid_company_df[valid_company_df["Calculated Price Tier"] == tier]["Previous Net Sales"].sum()
                 curr_rev = tier_df["Present Net Sales"].sum()
                 
                 growth = ((curr_rev - prev_rev) / prev_rev * 100) if prev_rev else 0
@@ -254,7 +264,8 @@ if company_file and competitor_file:
                 }
             
             # --- Also rebuild SKU matrix (this is fine, no change needed)
-            for _, row in full_df.iterrows():
+            for _, row in company_df.iterrows():
+
                 tier = row["Calculated Price Tier"]
                 cls = row["Classification"]
                 sku = row["SKU"]
